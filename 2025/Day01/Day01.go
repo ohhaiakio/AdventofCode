@@ -17,13 +17,6 @@ func isError(err error) bool {
 	return (err != nil)
 }
 
-func Abs(i int) int {
-	if i < 0 {
-		return (100 + i)
-	}
-	return i
-}
-
 func main() {
 	//Open input file
 	var file, err = os.Open(path)
@@ -42,20 +35,38 @@ func main() {
 	var dial int = 50
 
 	for scanner.Scan() {
-		// fmt.Println(scanner.Text())
-		dir := scanner.Text()[:1]
-		num, _ := strconv.Atoi(scanner.Text()[1:])
-		// fmt.Println(dir, num)
-		if dir == "L" {
-			dial = Abs(dial-num) % 100
+		// This is the "passing or at zero" variable
+		wrap := 0
 
-		} else {
-			dial = (dial + num) % 100
+		// Grab instructions and save old data
+		previous := dial
+		dir := scanner.Text()[:1]
+		num, err := strconv.Atoi(scanner.Text()[1:])
+		if err != nil {
+			fmt.Println(err)
+			break
 		}
-		if dial == 0 {
-			count += 1
+
+		// Left or right?
+		if dir == "L" {
+			dial = dial - num
+			if dial < 0 {
+				wrap = (-dial / 100) + 1     //determine how many times we pass zero
+				dial = ((wrap) * 100) + dial //spicy absolute value
+				if previous == 0 {           //needed to not double count passing zero
+					wrap += -1
+				}
+				dial = dial % 100 //edge case where we accidentally make a 0 a 100 but it's fine i'm sure
+			} else if dial == 0 { // another edge where this zero doesn't get counted
+				wrap += 1
+			}
+		} else { //R
+			dial = (dial + num)
+			wrap += dial / 100
+			dial = dial % 100
 		}
-		// fmt.Println(dial)
+
+		count += wrap
 	}
 
 	// And we're done!
