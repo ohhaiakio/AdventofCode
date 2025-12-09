@@ -7,8 +7,9 @@ import (
 	"strings"
 )
 
-var path = "sample.txt" //path to problem input
+var path = "input.txt" //path to problem input
 var split = 0
+var count int = 1
 
 // Function to handle errors
 func isError(err error) bool {
@@ -35,6 +36,24 @@ func extendBeam(beam []int, manifold []string, line int) []int {
 	return new_beam
 }
 
+func extendBeam2(beam []int, manifold []string, line int) []int {
+	new_beam := make([]int, len(beam))
+	// old_split := split
+	// total := 0
+	for i, x := range beam {
+		if x >= 1 {
+			if manifold[i] == "^" {
+				new_beam[i+1] += x
+				new_beam[i-1] += x
+				split += 1
+			} else {
+				new_beam[i] += x
+			}
+		}
+	}
+	return new_beam
+}
+
 func main() {
 	//Open input file
 	var file, err = os.Open(path)
@@ -47,7 +66,7 @@ func main() {
 	scanner.Split(bufio.ScanLines)
 
 	// //initialize output variable
-	// var count int = 0
+
 	matrix := [][]string{}
 
 	for scanner.Scan() {
@@ -67,11 +86,15 @@ func main() {
 		if i == 0 {
 			continue
 		}
-		beams = extendBeam(beams, l, i)
-		// fmt.Println(beams)
+		beams = extendBeam2(beams, l, i)
+		fmt.Println(beams, count)
+	}
+	for _, x := range beams {
+		count += x
 	}
 
 	// And we're done!
-	fmt.Printf("\nI think we're finished and the count was %v.\n", split)
+	fmt.Printf("\nI think we're finished and the splits was %v.\n", split)
+	fmt.Printf("\nI think we're finished and the count was %v.\n", count-1)
 
 }
